@@ -15,6 +15,23 @@ from app.utils.types import MediaType
 
 class StringUtils:
 
+
+    @staticmethod
+    def format_timestamp(timestamp: str, date_format: str = '%Y-%m-%d %H:%M:%S') -> str:
+        """
+        时间戳转日期
+        :param timestamp:
+        :param date_format:
+        :return:
+        """
+        if isinstance(timestamp, str) and not timestamp.isdigit():
+            return timestamp
+        try:
+            return datetime.datetime.fromtimestamp(int(timestamp)).strftime(date_format)
+        except Exception as e:
+            print(str(e))
+            return timestamp
+
     @staticmethod
     def num_filesize(text):
         """
