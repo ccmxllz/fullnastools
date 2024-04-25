@@ -22,6 +22,9 @@ class _ISiteUserInfo(metaclass=ABCMeta):
     # 站点解析时判断顺序，值越小越先解析
     order = SITE_BASE_ORDER
 
+    # 请求模式 cookie/apikey
+    request_mode = "cookie"
+
     def __init__(self, site_name, url, site_cookie, index_html, session=None, ua=None):
         super().__init__()
         # 站点信息
@@ -31,6 +34,8 @@ class _ISiteUserInfo(metaclass=ABCMeta):
         # 用户信息
         self.username = None
         self.userid = None
+
+
         # 未读消息
         self.message_unread = 0
         self.message_unread_contents = []
@@ -55,6 +60,9 @@ class _ISiteUserInfo(metaclass=ABCMeta):
         self.seeding_info = []
 
         # 用户详细信息
+        self._user_basic_page = None
+        self._user_basic_params = None
+        self._user_basic_headers = None
         self.user_level = None
         self.join_at = None
         self.bonus = 0.0
@@ -76,6 +84,8 @@ class _ISiteUserInfo(metaclass=ABCMeta):
         self._sys_mail_unread_page = "messages.php?action=viewmailbox&box=-2&unread=yes"
         self._torrent_seeding_params = None
         self._torrent_seeding_headers = None
+        self._user_detail_params = None
+        self._user_detail_headers = None
 
         split_url = urlsplit(url)
         self.site_name = site_name
@@ -114,13 +124,39 @@ class _ISiteUserInfo(metaclass=ABCMeta):
             return
 
         self._parse_site_page(self._index_html)
-        self._parse_user_base_info(self._index_html)
-        self._pase_unread_msgs()
-        if self._user_traffic_page:
-            self._parse_user_traffic_info(self._get_page_content(urljoin(self._base_url, self._user_traffic_page)))
-        if self._user_detail_page:
-            self._parse_user_detail_info(self._get_page_content(urljoin(self._base_url, self._user_detail_page)))
 
+        # 解析用户基础信息
+        if self._user_basic_page:
+            self._parse_user_base_info(
+                self._get_page_content(
+                    url=urljoin(self._base_url, self._user_basic_page),
+                    params=self._user_basic_params,
+                    headers=self._user_basic_headers
+                )
+            )
+        else:
+            self._parse_user_base_info(self._index_html)
+        # 解析用户详细信息
+        if self._user_detail_page:
+            self._parse_user_detail_info(
+                self._get_page_content(
+                    url=urljoin(self._base_url, self._user_detail_page),
+                    params=self._user_detail_params,
+                    headers=self._user_detail_headers
+                )
+            )
+        # 解析用户未读消息
+        self._pase_unread_msgs()
+        # 解析用户上传、下载、分享率等信息
+        if self._user_traffic_page:
+            self._parse_user_traffic_info(
+                self._get_page_content(
+                    url=urljoin(self._base_url, self._user_traffic_page),
+                    params=self._user_traffic_params,
+                    headers=self._user_traffic_headers
+                )
+            )
+        # 解析用户做种信息
         self._parse_seeding_pages()
         self.seeding_info = json.dumps(self.seeding_info)
 
@@ -217,7 +253,9 @@ class _ISiteUserInfo(metaclass=ABCMeta):
         """
         req_headers = None
         if self._ua or headers or self._addition_headers:
-            req_headers = {}
+            req_headers = {
+                "User-Agent": f"{self._ua}"
+            }
             if headers:
                 req_headers.update(headers)
 
@@ -232,12 +270,21 @@ class _ISiteUserInfo(metaclass=ABCMeta):
             if self._addition_headers:
                 req_headers.update(self._addition_headers)
 
+        if self.request_mode == "apikey":
+            # 使用apikey请求，通过请求头传递
+            cookie = None
+            session = None
+        else:
+            # 使用cookie请求
+            cookie = self._site_cookie
+            session = self._session
+
         if params:
-            res = RequestUtils(cookies=self._site_cookie, session=self._session, timeout=60,
+            res = RequestUtils(cookies=cookie, session=session, timeout=60,
                                headers=req_headers).post_res(
                 url=url, params=params)
         else:
-            res = RequestUtils(cookies=self._site_cookie, session=self._session, timeout=60,
+            res = RequestUtils(cookies=cookie, session=session, timeout=60,
                                headers=req_headers).get_res(
                 url=url)
         if res is not None and res.status_code in (200, 500):

@@ -9,7 +9,7 @@ from app.indexer.client._rarbg import Rarbg
 from app.indexer.client._render_spider import RenderSpider
 from app.indexer.client._spider import TorrentSpider
 from app.indexer.client._tnode import TNodeSpider
-from app.indexer.mtorrent import MTorrentSpider
+from app.indexer.client.mtorrent import MTorrentSpider
 from app.sites import Sites
 from app.utils import StringUtils
 from app.utils.types import SearchType, IndexerType
@@ -153,8 +153,7 @@ class BuiltinIndexer(_IIndexClient):
             if indexer.parser == "mTorrent":
                 error_flag, result_array = MTorrentSpider(indexer).search(
                     keyword=search_word,
-                    mtype=None,
-                    page=0
+                    mtype=match_media.type if match_media else None,
                 )
             elif indexer.parser == "Rarbg":
                 imdb_id = match_media.imdb_id if match_media else None
