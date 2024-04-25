@@ -3,6 +3,8 @@ import random
 import time
 from datetime import datetime
 from functools import lru_cache
+from typing import Tuple
+from urllib.parse import urljoin
 
 from lxml import etree
 
@@ -105,6 +107,11 @@ class Sites:
             site_strict_url = StringUtils.get_url_domain(site.SIGNURL or site.RSSURL)
             if site_strict_url:
                 self._siteByUrls[site_strict_url] = site_info
+            # 特殊站点登录验证
+            self.special_site_test = {
+                "m-team.io": self.__mteam_test,
+                "m-team.cc": self.__mteam_test,
+            }
 
     def init_favicons(self):
         """
@@ -207,6 +214,14 @@ class Sites:
         site_info = self.get_sites(siteid=site_id)
         if not site_info:
             return False, "站点不存在", 0
+
+        # 检查域名是否可用
+        domain = StringUtils.get_url_domain_v2(site_info.get('signurl'))
+        if self.special_site_test.get(domain):
+            start_time = datetime.now()
+            state, message = self.special_site_test[domain](site_info)
+            seconds = int((datetime.now() - start_time).microseconds / 1000)
+            return  state, message, seconds
         site_cookie = site_info.get("cookie")
         if not site_cookie:
             return False, "未配置站点Cookie", 0
@@ -250,6 +265,8 @@ class Sites:
                 return False, f"连接失败，状态码：{res.status_code}", seconds
             else:
                 return False, "无法打开网站", seconds
+
+
 
     def get_site_attr(self, url):
         """
@@ -420,3 +437,36 @@ class Sites:
         if note:
             infos = json.loads(note)
         return infos
+
+    @staticmethod
+    def __mteam_test(site:dict) -> Tuple[bool, str]:
+        """
+        判断站点是否已经登陆：m-team
+        """
+        user_agent = site.get("ua") or f"{Config().get_ua()}"
+        url = f"{site.get('signurl')}api/member/profile"
+        res = RequestUtils(
+            headers={
+                "User-Agent": user_agent,
+            },
+            cookies=site.get("cookie"),
+            proxies= None,
+            timeout=15
+        ).post_res(url=url)
+        if res and res.status_code == 200:
+            user_info = res.json()
+            if user_info and user_info.get("data"):
+                # 更新最后访问时间
+                res = RequestUtils(cookies=site.get("cookie"),
+                                   headers={
+                                       "User-Agent": user_agent,
+                                   },
+                                   timeout=60,
+                                   proxies= site.get("proxy") or None,
+                                   referer=f"{site.get('signurl')}index"
+                                   ).post_res(url=urljoin(url, "api/member/updateLastBrowse"))
+                if res:
+                    return True, "连接成功"
+                else:
+                    return True, f"连接成功，但更新状态失败"
+        return False, "Cookie已失效"

@@ -5,6 +5,7 @@ from typing import Tuple, List
 
 from ruamel.yaml import CommentedMap
 
+from app.helper import IndexerConf
 from app.utils import RequestUtils
 from app.utils.string_utils import StringUtils
 import log
@@ -46,29 +47,34 @@ class MTorrentSpider:
         "7": "DIY 国配 中字"
     }
 
-    def __init__(self, indexer: CommentedMap):
-        self._indexerid = 1
+    cache_dic = {}
+
+    def __init__(self, indexer: IndexerConf):
+        """
+              self._indexerid = indexer.id
         self._domain = "https://xp.m-team.io/"
         self._searchurl = 'https://xp.m-team.io/api/torrent/search'
         self._name = "馒头"
         self._proxy = None
         self._cookie = "auth=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJteGxseiIsInVpZCI6Mjk4NTk1LCJqdGkiOiI4MTFmYTI1OS0wOTgzLTQ0NzItYjdhMi01ZGYzMGExZjBlZTAiLCJpc3MiOiJodHRwczovL3hwLm0tdGVhbS5pbyIsImlhdCI6MTcxMjIxOTk4NCwiZXhwIjoxNzE0ODExOTg0fQ.ZBiAXYBYC6m6YE-l3frBMsj7bZanz9iw6CAo93lE2EQnu_X40wbZKs1KZ045aErnV5MyFPGaIRSD7QOak_yPig"
         self._ua = "string"
+        :param indexer:
+        """
         if indexer:
-            self._indexerid = 1
-            self._domain = "https://xp.m-team.io/"
-            self._searchurl = 'https://xp.m-team.io/api/torrent/search'
-            self._name = "馒头"
+            self._indexerid = indexer.id
+            self._domain = indexer.domain
+            self._searchurl =  self._searchurl % self._domain
+            self._name = indexer.name
             self._proxy = None
-            self._cookie = "auth=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJteGxseiIsInVpZCI6Mjk4NTk1LCJqdGkiOiI4MTFmYTI1OS0wOTgzLTQ0NzItYjdhMi01ZGYzMGExZjBlZTAiLCJpc3MiOiJodHRwczovL3hwLm0tdGVhbS5pbyIsImlhdCI6MTcxMjIxOTk4NCwiZXhwIjoxNzE0ODExOTg0fQ.ZBiAXYBYC6m6YE-l3frBMsj7bZanz9iw6CAo93lE2EQnu_X40wbZKs1KZ045aErnV5MyFPGaIRSD7QOak_yPig"
-            self._ua = "string"
+            self._cookie = indexer.cookie
+            self._ua = indexer.ua
 
     def __get_apikey(self) -> str:
         """
         获取ApiKey
         """
-        domain_host = "m-team"
-        self._apikey = "7d79598c-bed0-4a55-9d15-08dd91f7deb8"
+        domain_host = StringUtils.get_url_host(self._domain)
+        self._apikey = self.cache_dic.get(f"site.{domain_host}.apikey")
         if not self._apikey:
             try:
                 res = RequestUtils(
@@ -88,7 +94,7 @@ class MTorrentSpider:
                         # 按lastModifiedDate倒序排序
                         api_keys.sort(key=lambda x: x.get('lastModifiedDate'), reverse=True)
                         self._apikey = api_keys[0].get('apiKey')
-                        self.systemconfig.set(f"site.{domain_host}.apikey", self._apikey)
+                        self.cache_dic[f"site.{domain_host}.apikey"] = self._apikey
                     else:
                         log.warn(f"{self._name} 获取ApiKey失败，请先在`控制台`->`实验室`建立存取令牌")
                 else:
@@ -123,7 +129,7 @@ class MTorrentSpider:
         res = RequestUtils(
             headers={
                 "Content-Type": "application/json",
-                "User-Agent": f"{Config().get_ua()}",
+                "User-Agent": self._ua or f"{Config().get_ua()}",
                 "x-api-key": self._apikey
             },
             proxies=self._proxy,
