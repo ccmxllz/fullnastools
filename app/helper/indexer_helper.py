@@ -19,6 +19,7 @@ class IndexerHelper:
                                    "sites.dat"),
                       "rb") as f:
                 self._indexers = pickle.load(f)
+               # print(json.dumps(self._indexers, indent=4))
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 

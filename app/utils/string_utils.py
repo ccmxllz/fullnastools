@@ -12,8 +12,41 @@ import cn2an
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.types import MediaType
 
+_special_domains = [
+    'u2.dmhy.org',
+    'pt.ecust.pp.ua',
+]
 
 class StringUtils:
+
+
+    @staticmethod
+    def get_url_host(url: str) -> str:
+        """
+        获取URL的一级域名
+        """
+        if not url:
+            return ""
+        _, netloc = StringUtils.get_url_netloc(url)
+        if not netloc:
+            return ""
+        return netloc.split(".")[-2]
+
+    @staticmethod
+    def format_timestamp(timestamp: str, date_format: str = '%Y-%m-%d %H:%M:%S') -> str:
+        """
+        时间戳转日期
+        :param timestamp:
+        :param date_format:
+        :return:
+        """
+        if isinstance(timestamp, str) and not timestamp.isdigit():
+            return timestamp
+        try:
+            return datetime.datetime.fromtimestamp(int(timestamp)).strftime(date_format)
+        except Exception as e:
+            print(str(e))
+            return timestamp
 
     @staticmethod
     def num_filesize(text):
@@ -239,10 +272,30 @@ class StringUtils:
         return ""
 
     @staticmethod
+    def get_url_domain_v2(url: str) -> str:
+        """
+        获取URL的域名部分，只保留最后两级
+        """
+        if not url:
+            return ""
+        for domain in _special_domains:
+            if domain in url:
+                return domain
+        _, netloc = StringUtils.get_url_netloc(url)
+        if netloc:
+            locs = netloc.split(".")
+            if len(locs) > 3:
+                return netloc
+            return ".".join(locs[-2:])
+        return ""
+
+    @staticmethod
     def get_base_url(url):
         """
         获取URL根地址
         """
+        if not url:
+            return ""
         scheme, netloc = StringUtils.get_url_netloc(url)
         return f"{scheme}://{netloc}"
 
