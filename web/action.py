@@ -31,7 +31,8 @@ from app.message import Message, MessageCenter
 from app.rss import Rss
 from app.rsschecker import RssChecker
 from app.scheduler import stop_scheduler
-from app.sites import Sites, SiteUserInfo, SiteSignin, SiteCookie
+from app.sites import Sites
+from app.sites.sitecookie import SiteCookie
 from app.subscribe import Subscribe
 from app.subtitle import Subtitle
 from app.sync import Sync, stop_monitor

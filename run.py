@@ -126,7 +126,7 @@ def start_service():
     IndexerHelper()
     # 初始化浏览器
     #if not is_windows_exe:
-    #    ChromeHelper().init_driver()
+     #   ChromeHelper().init_driver()
 
 
 def monitor_config():

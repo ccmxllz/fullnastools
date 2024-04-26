@@ -2031,20 +2031,10 @@ class Media:
         """
         获取TMDB热门电影随机一张背景图
         """
-        try:
-            # 随机类型
-            mtype = MediaType.MOVIE if random.uniform(0, 1) > 0.5 else MediaType.TV
-            # 热门电影/电视剧
-            if mtype == MediaType.MOVIE:
-                medias = self.discover.discover_movies(params={"sort_by": "popularity.desc"})
-            else:
-                medias = self.discover.discover_tv_shows(params={"sort_by": "popularity.desc"})
-            if medias:
-                backdrops = [media.get("backdrop_path") for media in medias if media.get("backdrop_path")]
-                # 随机一张
-                return TMDB_IMAGE_ORIGINAL_URL % backdrops[round(random.uniform(0, len(backdrops) - 1))]
-        except Exception as err:
-            print(str(err))
+        movies = self.get_movie_discover()
+        if movies:
+            backdrops = [movie.get("backdrop_path") for movie in movies]
+            return TMDB_IMAGE_ORIGINAL_URL % backdrops[round(random.uniform(0, len(backdrops) - 1))]
         return ""
 
     def save_rename_cache(self, file_name, cache_info):

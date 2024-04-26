@@ -9,7 +9,6 @@ from app.indexer.client._rarbg import Rarbg
 from app.indexer.client._render_spider import RenderSpider
 from app.indexer.client._spider import TorrentSpider
 from app.indexer.client._tnode import TNodeSpider
-from app.indexer.client.mtorrent import MTorrentSpider
 from app.sites import Sites
 from app.utils import StringUtils
 from app.utils.types import SearchType, IndexerType
@@ -43,7 +42,7 @@ class BuiltinIndexer(_IIndexClient):
         """
         return True
 
-    def get_indexers(self, check=True, public=False, indexer_id=None):
+    def get_indexers(self, check=True, public=True, indexer_id=None):
         ret_indexers = []
         # 选中站点配置
         indexer_sites = Config().get_config("pt").get("indexer_sites") or []
@@ -150,12 +149,7 @@ class BuiltinIndexer(_IIndexClient):
             return []
         result_array = []
         try:
-            if indexer.parser == "mTorrent":
-                error_flag, result_array = MTorrentSpider(indexer).search(
-                    keyword=search_word,
-                    mtype=match_media.type if match_media else None,
-                )
-            elif indexer.parser == "Rarbg":
+            if indexer.parser == "Rarbg":
                 imdb_id = match_media.imdb_id if match_media else None
                 result_array = Rarbg().search(keyword=search_word, indexer=indexer, imdb_id=imdb_id)
             elif indexer.parser == "TNodeSpider":

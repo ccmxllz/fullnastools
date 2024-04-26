@@ -26,7 +26,7 @@ app:
   # 【WEB管理页面登录用户】，默认admin
   login_user: admin
   # 【WEB管理页面登录密码】：默认password，如果是全数字密码，要用''括起来
-  login_password: '[hash]pbkdf2:sha256:260000$v9CgvpsRq1ZUY1KS$bdf648787769e3767dcef2e20e0cab6f33f4381fffb7f0a5d9aa965e5501bf35'
+  login_password: '[hash]pbkdf2:sha256:260000$KjB4StXXsxgM1LPu$570d92fb3d7af4435bbf4383cded95d81753aa51f00b50d6ecc411b5e8032619'
   # 【WEB管理界面使用的HTTPS的证书和KEY的路径】，留空则不启用HTTPS
   ssl_cert:
   ssl_key:
@@ -338,7 +338,7 @@ security:
     ipv4: 127.0.0.1
     ipv6: ::/0
   # 【API认证密钥】：用于Jellyseerr、Overseerr中Authorization认证以及非客户端类的API调用
-  api_key: 7oIGioG3cDmsZDB8
+  api_key: BvKRLQMY6qwRaXSn
 
 # 【实验室】
 laboratory:
