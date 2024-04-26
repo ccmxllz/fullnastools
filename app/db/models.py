@@ -576,3 +576,13 @@ class MEDIASYNCSTATISTIC(BaseMedia):
     MOVIE_COUNT = Column(Text)
     TV_COUNT = Column(Text)
     UPDATE_TIME = Column(Text)
+
+
+class SystemConfigModel(BaseMedia):
+    __tablename__ = 'system_config'
+
+    id = Column(Integer, Sequence('id'), primary_key=True)
+    key = Column(Text, index=True)
+    value = Column(Text)
+
+
