@@ -3,12 +3,11 @@ from typing import Any, Union
 
 from app.db import MainDb, DbPersist
 from app.db.models import SystemConfigModel
-from app.utils.commons import singleton
 from app.utils.object import ObjectUtils
+from app.utils.singleton import Singleton
 
 
-@singleton
-class SystemConfigOper():
+class SystemConfigOper(metaclass=Singleton):
     # 配置对象
     __SYSTEMCONF: dict = {}
     _db = MainDb()

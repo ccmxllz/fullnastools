@@ -125,8 +125,8 @@ def start_service():
     # 启动播放限速服务
     SpeedLimiter()
     # 初始化浏览器驱动
-    if not is_windows_exe:
-        ChromeHelper().init_driver()
+    #if not is_windows_exe:
+   #     ChromeHelper().init_driver()
 
 
 def monitor_config():
