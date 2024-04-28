@@ -192,7 +192,13 @@ class BuiltinIndexer(_IIndexClient):
         indexer: IndexerConf = self.get_indexers(indexer_id=index_id)
         if not indexer:
             return []
-        if indexer.parser == "RenderSpider":
+
+        if indexer.parser == "mTorrent":
+            error_flag, result_array = MTorrentSpider(indexer).search(
+                keyword=keyword,
+            )
+            return result_array;
+        elif indexer.parser == "RenderSpider":
             return RenderSpider().search(keyword=keyword,
                                          indexer=indexer,
                                          page=page)
