@@ -10,8 +10,8 @@ RUN apk add --no-cache libffi-dev \
     && chmod +x /usr/bin/mc \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
-    && pip unistall libffi-dev \
     && pip install -r https://raw.githubusercontent.com/ccmxllz/fullnastools/dev-v2/requirements.txt \
+    && apk del libffi-dev \
     && npm install pm2 -g \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 ENV LANG="C.UTF-8" \
