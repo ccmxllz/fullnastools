@@ -26,7 +26,7 @@ app:
   # 【WEB管理页面登录用户】，默认admin
   login_user: admin
   # 【WEB管理页面登录密码】：默认password，如果是全数字密码，要用''括起来
-  login_password: '[hash]pbkdf2:sha256:260000$6mTFAT5WG3rX2qAB$94f26f663050a6527a3062cff45a5a6433c223de0d5709defc342152d10733ec'
+  login_password: '[hash]pbkdf2:sha256:260000$yZBCHHH0DYx7fc1y$c68307b69fe5665179d8d099535fc4292853e56dc56f4ca460bf6441474d22ae'
   # 【WEB管理界面使用的HTTPS的证书和KEY的路径】，留空则不启用HTTPS
   ssl_cert: ''
   ssl_key: ''
