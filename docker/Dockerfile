@@ -1,6 +1,6 @@
-FROM alpine
+FROM alpine:3.18
 RUN apk add --no-cache libffi-dev \
-    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/ccmxllz/nas-tools/v2/package_list.txt)) \
+    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/ccmxllz/fullnastools/dev-v2/package_list.txt)) \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo "${TZ}" > /etc/timezone \
     && ln -sf /usr/bin/python3 /usr/bin/python \
@@ -10,8 +10,8 @@ RUN apk add --no-cache libffi-dev \
     && chmod +x /usr/bin/mc \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
-    && pip install -r https://raw.githubusercontent.com/ccmxllz/nas-tools/v2/requirements.txt \
-    && apk del libffi-dev \
+    && pip unistall libffi-dev \
+    && pip install -r https://raw.githubusercontent.com/ccmxllz/fullnastools/dev-v2/requirements.txt \
     && npm install pm2 -g \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 ENV LANG="C.UTF-8" \
@@ -34,8 +34,7 @@ RUN python_ver=$(python3 -V | awk '{print $2}') \
     && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf \
     && echo 'fs.inotify.max_user_instances=524288' >> /etc/sysctl.conf \
     && git config --global pull.ff only \
-    && git clone -b dev-v2 \
-    ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
+    && git clone -b dev-v2 ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
     && git config --global --add safe.directory ${WORKDIR}
 EXPOSE 3000
 VOLUME ["/config"]
