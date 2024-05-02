@@ -38,6 +38,8 @@ class IndexerHelper:
                     ua=None,
                     render=None,
                     language=None,
+                    apikey=None,
+                    token=None,
                     pri=None):
         if not url:
             return None
@@ -56,7 +58,31 @@ class IndexerHelper:
                                    render=render,
                                    builtin=True,
                                    language=language,
-                                   pri=pri)
+                                   pri=pri,
+                                   apikey=apikey,
+                                   token=token,
+                                   )
+            ext_domains = indexer.get("ext_domains")
+            if ext_domains:
+                for domain in ext_domains :
+                    if StringUtils.url_equal(domain, url) :
+                        indexer['domain'] = domain
+                        return IndexerConf(datas=indexer,
+                                           cookie=cookie,
+                                           name=name,
+                                           rule=rule,
+                                           public=public,
+                                           proxy=proxy,
+                                           parser=parser,
+                                           ua=ua,
+                                           render=render,
+                                           builtin=True,
+                                           language=language,
+                                           pri=pri,
+                                           apikey=apikey,
+                                           token=token,
+                                           )
+
         return None
 
 
@@ -74,7 +100,9 @@ class IndexerConf(object):
                  render=None,
                  builtin=True,
                  language=None,
-                 pri=None):
+                 pri=None,
+                 apikey=None,
+                 token=None,):
         if not datas:
             return
         # ID
@@ -109,6 +137,8 @@ class IndexerConf(object):
         self.public = public
         # 是否使用代理
         self.proxy = proxy
+        self.apikey = apikey
+        self.token = token
         # 仅支持的特定语种
         self.language = language
         # 索引器优先级

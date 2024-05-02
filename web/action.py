@@ -1045,6 +1045,8 @@ class WebAction:
         rssurl = data.get('site_rssurl')
         signurl = data.get('site_signurl')
         cookie = data.get('site_cookie')
+        apikey = data.get('site_apikey')
+        token = data.get('site_token')
         note = data.get('site_note')
         if isinstance(note, dict):
             note = json.dumps(note)
@@ -1068,7 +1070,10 @@ class WebAction:
                                                    signurl=signurl,
                                                    cookie=cookie,
                                                    note=note,
-                                                   rss_uses=rss_uses)
+                                                   rss_uses=rss_uses,
+                                                   apikey=apikey,
+                                                   token=token,
+                                                   )
             if ret and (name != old_name):
                 # 更新历史站点数据信息
                 self.dbhelper.update_site_user_statistics_site_name(
@@ -1083,7 +1088,10 @@ class WebAction:
                                                    signurl=signurl,
                                                    cookie=cookie,
                                                    note=note,
-                                                   rss_uses=rss_uses)
+                                                   rss_uses=rss_uses,
+                                                   apikey=apikey,
+                                                   token=token,
+                                                   )
         # 生效站点配置
         Sites().init_config()
         # 初始化刷流任务
@@ -2791,6 +2799,7 @@ class WebAction:
     def __list_site_resources(data):
         resources = Indexer().list_builtin_resources(index_id=data.get("id"),
                                                      page=data.get("page"),
+                                                     mode=data.get("mode"),
                                                      keyword=data.get("keyword"))
         if not resources:
             return {"code": 1, "msg": "获取站点资源出现错误，无法连接到站点！"}

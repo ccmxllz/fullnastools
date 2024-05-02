@@ -19,7 +19,7 @@
         {% for Site in Sites %}
         <a class="card card-link-pop"
            href='javascript:void(0)'
-           onclick='open_site_resources(this, "resources?site={{ Site.id }}&title={{ Site.name }}")'>
+           onclick='open_site_resources(this, "{{ Site.id }}", "resources?site={{ Site.id }}&title={{ Site.name }}")'>
           <div class="card-body">
             <div class="row">
               <div class="col-auto">
@@ -28,7 +28,14 @@
               <div class="col">
                 <div class="font-weight-medium">{{ Site.name }}</div>
                 <div class="text-muted">{{ Site.domain }}</div>
+
               </div>
+                <div class="col-auto">
+                    <select id="resourceTypeSelect-{{ Site.id }}" class="form-select">
+                        <option value="">综合</option>
+                        <option value="adult">成人</option>
+                    </select>
+                </div>
             </div>
           </div>
         </a>
@@ -40,8 +47,19 @@
 {{ OOPS.nodatafound('没有站点', '没有找到任何站点，请正确维护站点信息。') }}
 {% endif %}
 <script type="text/javascript">
-  function open_site_resources(self, url) {
-    $(self).addClass("card-inactive");
-    navmenu(url);
+    selects = document.querySelectorAll('.form-select');
+    selects.forEach(function(select){
+        select.addEventListener('click', function(event){
+            event.stopPropagation();
+        });
+    });
+
+    function open_site_resources(self,siteId, url) {
+        var selectElement = document.getElementById('resourceTypeSelect-' + siteId);
+        var selectedValue = selectElement.value;
+        url = url + "&mode=" + selectedValue
+    // $(self).addClass("card-inactive");
+       console.info(selectedValue)
+       navmenu(url);
   }
 </script>

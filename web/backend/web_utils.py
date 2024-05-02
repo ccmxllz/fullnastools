@@ -124,7 +124,7 @@ class WebUtils:
         """
         if not keyword:
             return []
-        mtype, key_word, season_num, episode_num, _, content = StringUtils.get_keyword_from_string(keyword)
+        mtype, key_word, season_num, episode_num, _, content, _ = StringUtils.get_keyword_from_string(keyword)
         if source == "tmdb":
             use_douban_titles = False
         elif source == "douban":

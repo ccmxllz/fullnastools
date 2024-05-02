@@ -25,12 +25,14 @@ class _ISiteUserInfo(metaclass=ABCMeta):
     # 请求模式 cookie/apikey
     request_mode = "cookie"
 
-    def __init__(self, site_name, url, site_cookie, index_html, session=None, ua=None):
+    def __init__(self, site_name, url, site_cookie, index_html, session=None, ua=None, apikey=None, token=None):
         super().__init__()
         # 站点信息
         self.site_name = None
         self.site_url = None
         self.site_favicon = None
+        self.apikey = apikey
+        self.token = token
         # 用户信息
         self.username = None
         self.userid = None
@@ -259,7 +261,7 @@ class _ISiteUserInfo(metaclass=ABCMeta):
             if headers:
                 req_headers.update(headers)
 
-            if isinstance(self._ua, str):
+            if  isinstance(self._ua, str):
                 req_headers.update({
                     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
                     "User-Agent": f"{self._ua}"

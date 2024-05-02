@@ -30,7 +30,7 @@ def search_medias_for_web(content, ident_flag=True, filters=None, tmdbid=None, m
     :param media_type: 媒体类型，配合tmdbid传入
     :return: 错误码，错误原因，成功时直接插入数据库
     """
-    mtype, key_word, season_num, episode_num, year, content = StringUtils.get_keyword_from_string(content)
+    mtype, key_word, season_num, episode_num, year, content, mode = StringUtils.get_keyword_from_string(content)
     if not key_word:
         log.info("【Web】%s 检索关键字有误！" % content)
         return -1, "%s 未识别到搜索关键字！" % content
@@ -123,7 +123,8 @@ def search_medias_for_web(content, ident_flag=True, filters=None, tmdbid=None, m
         filter_args = {
             "season": season_num,
             "episode": episode_num,
-            "year": year
+            "year": year,
+            "mode": mode
         }
     # 整合高级查询条件
     if filters:

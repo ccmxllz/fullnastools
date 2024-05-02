@@ -375,7 +375,8 @@ def resources():
     site_name = request.args.get("title")
     page = request.args.get("page") or 0
     keyword = request.args.get("keyword")
-    Results = WebAction().action("list_site_resources", {"id": site_id, "page": page, "keyword": keyword}).get(
+    mode = request.args.get("mode")
+    Results = WebAction().action("list_site_resources", {"id": site_id, "page": page, "keyword": keyword, "mode":mode}).get(
         "data") or []
     return render_template("site/resources.html",
                            Results=Results,

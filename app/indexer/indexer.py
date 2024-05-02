@@ -89,14 +89,14 @@ class Indexer(object):
         return BuiltinIndexer().get_indexers(check=check, public=public, indexer_id=indexer_id)
 
     @staticmethod
-    def list_builtin_resources(index_id, page=0, keyword=None):
+    def list_builtin_resources(index_id, page=0, keyword=None, mode=None):
         """
         获取内置索引器的资源列表
         :param index_id: 内置站点ID
         :param page: 页码
         :param keyword: 搜索关键字
         """
-        return BuiltinIndexer().list(index_id=index_id, page=page, keyword=keyword)
+        return BuiltinIndexer().list(index_id=index_id, page=page, keyword=keyword, mode=mode)
 
     def __get_client(self, ctype: IndexerType, conf=None):
         return self.__build_class(ctype=ctype.value, conf=conf)

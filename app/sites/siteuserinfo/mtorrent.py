@@ -73,7 +73,7 @@ class MTorrentSiteUserInfo(_ISiteUserInfo):
             "Accept": "application/json, text/plain, */*"
         }
         self._addition_headers = {
-            "x-api-key": SystemConfigOper().get(f"site.{domain}.apikey"),
+            "x-api-key": self.apikey,
         }
 
     def _parse_logged_in(self, html_text):

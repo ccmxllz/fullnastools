@@ -54,9 +54,7 @@ class SiteUserInfo(object):
                 ExceptionUtils.exception_traceback(e)
         return None
 
-    def build(self, url, site_name, site_cookie=None, ua=None, emulate=None, proxy=False):
-        if not site_cookie:
-            return None
+    def build(self, url, site_name, site_cookie=None, ua=None, emulate=None, proxy=False, apikey=None, token=None):
         session = requests.Session()
         log.debug(f"【Sites】站点 {site_name} url={url} site_cookie={site_cookie} ua={ua}")
         # 检测环境，有浏览器内核的优先使用仿真签到
@@ -135,7 +133,7 @@ class SiteUserInfo(object):
         if not site_schema:
             log.error("【Sites】站点 %s 无法识别站点类型" % site_name)
             return None
-        return site_schema(site_name, url, site_cookie, html_text, session=session, ua=ua)
+        return site_schema(site_name, url, site_cookie, html_text, session=session, ua=ua, apikey=apikey, token=token)
 
     def __refresh_site_data(self, site_info):
         """
@@ -152,13 +150,18 @@ class SiteUserInfo(object):
         unread_msg_notify = site_info.get("unread_msg_notify")
         chrome = site_info.get("chrome")
         proxy = site_info.get("proxy")
+        apikey = site_info.get("apikey")
+        token = site_info.get("token")
         try:
             site_user_info = self.build(url=site_url,
                                         site_name=site_name,
                                         site_cookie=site_cookie,
                                         ua=ua,
                                         emulate=chrome,
-                                        proxy=proxy)
+                                        proxy=proxy,
+                                        apikey=apikey,
+                                        token=token
+                                        )
             if site_user_info:
                 log.debug(f"【Sites】站点 {site_name} 开始以 {site_user_info.site_schema()} 模型解析")
                 # 开始解析
@@ -241,7 +244,7 @@ class SiteUserInfo(object):
             if not force \
                     and not specify_sites \
                     and self._last_update_time \
-                    and (datetime.now() - self._last_update_time).seconds <  6 * 3600: #TODO 6 * 3600
+                    and (datetime.now() - self._last_update_time).seconds < 0:  # TODO 6 * 3600
                 return
 
             if specify_sites \

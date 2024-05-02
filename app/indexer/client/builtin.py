@@ -54,8 +54,7 @@ class BuiltinIndexer(_IIndexClient):
         for site in Sites().get_sites():
             if not site.get("rssurl") and not site.get("signurl"):
                 continue
-            if not site.get("cookie"):
-                continue
+
             url = site.get("signurl") or site.get("rssurl")
             public_site = self.sites.get_public_sites(url=url)
             if public_site:
@@ -78,6 +77,8 @@ class BuiltinIndexer(_IIndexClient):
                                                   name=site.get("name"),
                                                   rule=site.get("rule"),
                                                   pri=site.get('pri'),
+                                                  apikey=site.get('apikey'),
+                                                  token=site.get('token'),
                                                   public=is_public,
                                                   proxy=proxy,
                                                   render=render,
@@ -122,6 +123,7 @@ class BuiltinIndexer(_IIndexClient):
         """
         if not indexer or not key_word:
             return None
+
         # 不是配置的索引站点过滤掉
         indexer_sites = Config().get_config("pt").get("indexer_sites") or []
         if indexer_sites and indexer.id not in indexer_sites:
@@ -131,6 +133,9 @@ class BuiltinIndexer(_IIndexClient):
             _filter_args = {}
         else:
             _filter_args = copy.deepcopy(filter_args)
+
+        mode = _filter_args.get("mode")
+
         # 不在设定搜索范围的站点过滤掉
         if _filter_args.get("site") and indexer.name not in _filter_args.get("site"):
             return []
@@ -153,6 +158,7 @@ class BuiltinIndexer(_IIndexClient):
             if indexer.parser == "mTorrent":
                 error_flag, result_array = MTorrentSpider(indexer).search(
                     keyword=search_word,
+                    mode=mode,
                     mtype=match_media.type if match_media else None,
                 )
             elif indexer.parser == "Rarbg":
@@ -183,7 +189,7 @@ class BuiltinIndexer(_IIndexClient):
                                               match_media=match_media,
                                               start_time=start_time)
 
-    def list(self, index_id, page=0, keyword=None):
+    def list(self, index_id, page=0, keyword=None, mode=None):
         """
         根据站点ID检索站点首页资源
         """
@@ -196,6 +202,7 @@ class BuiltinIndexer(_IIndexClient):
         if indexer.parser == "mTorrent":
             error_flag, result_array = MTorrentSpider(indexer).search(
                 keyword=keyword,
+                mode=mode,
             )
             return result_array;
         elif indexer.parser == "RenderSpider":
@@ -206,10 +213,11 @@ class BuiltinIndexer(_IIndexClient):
             return TNodeSpider(indexer=indexer).search(keyword=keyword, page=page)
         return self.__spider_search(indexer=indexer,
                                     page=page,
+                                    mode=mode,
                                     keyword=keyword)
 
     @staticmethod
-    def __spider_search(indexer, keyword=None, page=None, mtype=None, timeout=30):
+    def __spider_search(indexer, keyword=None, page=None, mtype=None,mode=None, timeout=30):
         """
         根据关键字搜索单个站点
         """
@@ -217,6 +225,7 @@ class BuiltinIndexer(_IIndexClient):
         spider.setparam(indexer=indexer,
                         keyword=keyword,
                         page=page,
+                        mode=mode,
                         mtype=mtype)
         spider.start()
         # 循环判断是否获取到数据

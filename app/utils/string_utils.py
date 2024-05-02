@@ -190,7 +190,8 @@ class StringUtils:
         忽略特殊字符
         """
         # 需要忽略的特殊字符
-        CONVERT_EMPTY_CHARS = r"[、.。,，·:：;；!！'’\"“”()（）\[\]【】「」\-——\+\|\\_/&#～~]"
+       # CONVERT_EMPTY_CHARS = r"[、.。,，·:：;；!！'’\"“”()（）\[\]【】「」\-——\+\|\\_/&#～~]"
+        CONVERT_EMPTY_CHARS = r"[、.。,，·:：;；!！'’\"“”()（）\[\]【】「」\——\+\|\\/&#～~]"
         if not text:
             return text
         if not isinstance(text, list):
@@ -311,13 +312,17 @@ class StringUtils:
         从检索关键字中拆分中年份、季、集、类型
         """
         if not content:
-            return None, None, None, None, None
+            return None, None, None, None, None,None
+        mode = None
+        mtype = None
         # 去掉查询中的电影或电视剧关键字
         if re.search(r'^电视剧|\s+电视剧|^动漫|\s+动漫', content):
             mtype = MediaType.TV
+        elif re.search(r'^成人|\s+成人', content):
+            mode = 'adult'
         else:
             mtype = None
-        content = re.sub(r'^电影|^电视剧|^动漫|\s+电影|\s+电视剧|\s+动漫', '', content).strip()
+        content = re.sub(r'^成人|^电影|^电视剧|^动漫|\s+成人\s+电影|\s+电视剧|\s+动漫', '', content).strip()
         # 稍微切一下剧集吧
         season_num = None
         episode_num = None
@@ -344,7 +349,7 @@ class StringUtils:
         if not key_word:
             key_word = year
 
-        return mtype, key_word, season_num, episode_num, year, content
+        return mtype, key_word, season_num, episode_num, year, content,mode
 
     @staticmethod
     def generate_random_str(randomlength=16):

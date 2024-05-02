@@ -18,7 +18,7 @@ app:
   # 【群晖日志中心IP和端口】：logtype为SERVER时生效。端口一般是514，只需要改动IP为群晖的IP，示例：127.0.0.1:514
   logserver: 127.0.0.1:514
   # 【日志级别】：info、debug、error
-  loglevel: info
+  loglevel: debug
   # 【WEB管理界面监听地址】：如需支持ipv6需设置为::，如::无法访问可改为0.0.0.0
   web_host: '::'
   # 【WEB管理界面端口】：默认3000

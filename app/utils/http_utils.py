@@ -1,3 +1,5 @@
+import traceback
+
 import requests
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
@@ -142,7 +144,9 @@ class RequestUtils:
                                      allow_redirects=allow_redirects,
                                      files=files,
                                      json=json)
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            #  print(f"An error occurred: {e}")
+            #  print(traceback.format_exc())  # 导入traceback模块以打印堆栈跟踪
             return None
 
     @staticmethod

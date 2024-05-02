@@ -60,7 +60,7 @@ class MetaAnime(MetaBase):
                             self.en_name = "%s %s" % (self.en_name or "", word)
                             lastword_type = "en"
                 if self.cn_name:
-                    _, self.cn_name, _, _, _, _ = StringUtils.get_keyword_from_string(self.cn_name)
+                    _, self.cn_name, _, _, _, _, _ = StringUtils.get_keyword_from_string(self.cn_name)
                     if self.cn_name:
                         self.cn_name = re.sub(r'%s' % self._name_nostring_re, '', self.cn_name, flags=re.IGNORECASE).strip()
                         self.cn_name = zhconv.convert(self.cn_name, "zh-hans")

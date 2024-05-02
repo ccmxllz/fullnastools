@@ -1,6 +1,7 @@
 import base64
 import json
 import re
+from datetime import datetime
 from typing import Tuple, List
 
 import log
@@ -33,6 +34,7 @@ class MTorrentSpider:
 
     # API KEY
     _apikey = None
+    _token = None
 
     # 标签
     _labels = {
@@ -55,6 +57,8 @@ class MTorrentSpider:
             self._proxy = None
             self._cookie = indexer.cookie
             self._ua = indexer.ua
+            self._apikey = indexer.apikey
+            self._token = indexer.token
 
     def __get_apikey(self) -> str:
         """
@@ -90,13 +94,11 @@ class MTorrentSpider:
                 log.error(f"{self._name} 获取ApiKey出错：{e}")
         return self._apikey
 
-    def search(self, keyword: str, mtype: MediaType = None, page: int = 0) -> Tuple[bool, List[dict]]:
+    def search(self, keyword: str, mtype: MediaType = None, mode: str = None, page: int = 0) -> Tuple[bool, List[dict]]:
         """
         搜索
         """
         # 检查ApiKey
-        self.__get_apikey()
-
         if not self._apikey:
             return True, []
 
@@ -111,7 +113,8 @@ class MTorrentSpider:
             "categories": categories,
             "pageNumber": int(page) + 1,
             "pageSize": self._size,
-            "visible": 1
+            "visible": 1,
+            "mode": mode,
         }
         res = RequestUtils(
             headers={
@@ -151,6 +154,7 @@ class MTorrentSpider:
                     'grabs': int(result.get('status', {}).get("timesCompleted") or '0'),
                     'downloadvolumefactor': self.__get_downloadvolumefactor(result.get('status', {}).get("discount")),
                     'uploadvolumefactor': self.__get_uploadvolumefactor(result.get('status', {}).get("discount")),
+                    'endtime': self.__get_end_time(result.get('status', {}).get("discountEndTime")),
                     'page_url': self._pageurl % (self._domain, result.get('id')),
                     'imdbid': self.__find_imdbid(result.get('imdb')),
                     'labels': labels,
@@ -228,3 +232,20 @@ class MTorrentSpider:
         # base64编码
         base64_str = base64.b64encode(json.dumps(params).encode('utf-8')).decode('utf-8')
         return f"[{base64_str}]{url}"
+
+    def __get_end_time(self, given_time_str: None):
+        if not given_time_str:
+            return ''
+        given_time = datetime.strptime(given_time_str, '%Y-%m-%d %H:%M:%S')
+        # 获取当前时间
+        now = datetime.now()
+        # 计算时间差
+        time_difference = given_time - now
+        # 如果时间差大于一天，则计算天数
+        if time_difference.days > 0:
+           return f"限时：{time_difference.days} 天 {time_difference.seconds // 3600} 小时内"
+        # 如果时间差不足一天，则计算小时数
+        elif (time_difference.seconds // 3600) > 0:
+            return f"限时：{time_difference.seconds // 3600} 小时内"
+        else:
+            return f"限时：{time_difference.seconds // 60} 分钟内"

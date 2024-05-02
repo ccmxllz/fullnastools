@@ -63,13 +63,15 @@ class Sites:
             site_rssurl = site.RSSURL
             site_signurl = site.SIGNURL
             site_cookie = site.COOKIE
+            site_apikey = site.apikey
+            site_token = site.token
             site_uses = site.INCLUDE or ''
             uses = []
             if site_uses:
-                signin_enable = True if "Q" in site_uses and site_signurl and site_cookie else False
+                signin_enable = True if "Q" in site_uses and site_signurl else False
                 rss_enable = True if "D" in site_uses and site_rssurl else False
-                brush_enable = True if "S" in site_uses and site_rssurl and site_cookie else False
-                statistic_enable = True if "T" in site_uses and (site_rssurl or site_signurl) and site_cookie else False
+                brush_enable = True if "S" in site_uses and site_rssurl else False
+                statistic_enable = True if "T" in site_uses and (site_rssurl or site_signurl) else False
                 uses.append("Q") if signin_enable else None
                 uses.append("D") if rss_enable else None
                 uses.append("S") if brush_enable else None
@@ -94,6 +96,8 @@ class Sites:
                 "statistic_enable": statistic_enable,
                 "uses": uses,
                 "ua": site_note.get("ua"),
+                "apikey": site_apikey,
+                "token": site_token,
                 "parse": True if site_note.get("parse") == "Y" else False,
                 "unread_msg_notify": True if site_note.get("message") == "Y" else False,
                 "chrome": True if site_note.get("chrome") == "Y" else False,
@@ -221,7 +225,7 @@ class Sites:
             start_time = datetime.now()
             state, message = self.special_site_test[domain](site_info)
             seconds = int((datetime.now() - start_time).microseconds / 1000)
-            return  state, message, seconds
+            return state, message, seconds
         site_cookie = site_info.get("cookie")
         if not site_cookie:
             return False, "未配置站点Cookie", 0
@@ -444,12 +448,16 @@ class Sites:
         判断站点是否已经登陆：m-team
         """
         user_agent = site.get("ua") or f"{Config().get_ua()}"
+        token = site.get("token")
         url = f"{site.get('signurl')}api/member/profile"
+        headers={
+            "User-Agent": user_agent,
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/plain, */*",
+            "Authorization": token
+        }
         res = RequestUtils(
-            headers={
-                "User-Agent": user_agent,
-            },
-            cookies=site.get("cookie"),
+            headers=headers,
             proxies= None,
             timeout=15
         ).post_res(url=url)
@@ -458,9 +466,7 @@ class Sites:
             if user_info and user_info.get("data"):
                 # 更新最后访问时间
                 res = RequestUtils(cookies=site.get("cookie"),
-                                   headers={
-                                       "User-Agent": user_agent,
-                                   },
+                                   headers=headers,
                                    timeout=60,
                                    proxies= site.get("proxy") or None,
                                    referer=f"{site.get('signurl')}index"
@@ -469,4 +475,4 @@ class Sites:
                     return True, "连接成功"
                 else:
                     return True, f"连接成功，但更新状态失败"
-        return False, "Cookie已失效"
+        return False, "鉴权已失效或过期"

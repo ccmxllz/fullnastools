@@ -83,6 +83,7 @@ class TorrentSpider(feapder.AirSpider):
                  keyword: [str, list] = None,
                  page=None,
                  referer=None,
+                 mode=None,
                  mtype: MediaType = None):
         """
         设置查询参数
@@ -106,6 +107,7 @@ class TorrentSpider(feapder.AirSpider):
         self.fields = indexer.torrents.get('fields')
         self.render = indexer.render
         self.domain = indexer.domain
+        self.mode = mode
         self.page = page
         if self.domain and not str(self.domain).endswith("/"):
             self.domain = self.domain + "/"
@@ -138,7 +140,7 @@ class TorrentSpider(feapder.AirSpider):
             torrentspath = paths[0].get('path', '')
         else:
             for path in paths:
-                if path.get("type") == "all" and not self.mtype:
+                if path.get("type") == "all" and not self.mtype and not self.mode:
                     torrentspath = path.get('path')
                     break
                 elif path.get("type") == "movie" and self.mtype == MediaType.MOVIE:
@@ -150,6 +152,10 @@ class TorrentSpider(feapder.AirSpider):
                 elif path.get("type") == "anime" and self.mtype == MediaType.ANIME:
                     torrentspath = path.get('path')
                     break
+                elif path.get("type") == "adult" and self.mode == 'adult':
+                    torrentspath = path.get('path')
+                    break
+
 
         # 关键字搜索
         if self.keyword:
