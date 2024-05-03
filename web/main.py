@@ -386,6 +386,7 @@ def resources():
                            TotalCount=len(Results),
                            PageRange=range(0, 10),
                            CurrentPage=int(page),
+                           Mode=mode,
                            TotalPage=10)
 
 

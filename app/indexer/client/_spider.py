@@ -140,7 +140,7 @@ class TorrentSpider(feapder.AirSpider):
             torrentspath = paths[0].get('path', '')
         else:
             for path in paths:
-                if path.get("type") == "all" and not self.mtype and not self.mode:
+                if path.get("type") == "all" and not self.mtype and self.mode != 'adult':
                     torrentspath = path.get('path')
                     break
                 elif path.get("type") == "movie" and self.mtype == MediaType.MOVIE:

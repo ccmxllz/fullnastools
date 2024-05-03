@@ -183,17 +183,17 @@
 
   //跳转页
   function go_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?mode={{Mode}}&site={{ SiteId }}&title={{ Title }}&page=${page}&keyword=${$("#search_word").val()}`)
   }
 
   // 上一页
   function go_pre_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page - 1}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?mode={{Mode}}&site={{ SiteId }}&title={{ Title }}&page=${page - 1}&keyword=${$("#search_word").val()}`)
   }
 
   // 下一页
   function go_next_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page + 1}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?mode={{Mode}}&site={{ SiteId }}&title={{ Title }}&page=${page + 1}&keyword=${$("#search_word").val()}`)
   }
 
   //下载按钮

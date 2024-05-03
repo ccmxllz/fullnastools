@@ -202,6 +202,7 @@ class BuiltinIndexer(_IIndexClient):
         if indexer.parser == "mTorrent":
             error_flag, result_array = MTorrentSpider(indexer).search(
                 keyword=keyword,
+                page=page,
                 mode=mode,
             )
             return result_array;

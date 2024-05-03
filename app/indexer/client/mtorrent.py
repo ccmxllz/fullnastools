@@ -114,8 +114,10 @@ class MTorrentSpider:
             "pageNumber": int(page) + 1,
             "pageSize": self._size,
             "visible": 1,
-            "mode": mode,
         }
+        if mode == 'adult':
+            params["mode"] = mode
+
         res = RequestUtils(
             headers={
                 "Content-Type": "application/json",
@@ -144,10 +146,11 @@ class MTorrentSpider:
                 else:
                     labels = []
                 torrent = {
-                    'title': result.get('name'),
+                    'title': self.__get_title(result.get('name')),
                     'description': result.get('smallDescr'),
                     'enclosure': self.__get_download_url(result.get('id')),
-                    'pubdate': StringUtils.format_timestamp(result.get('createdDate')),
+                    'pubdate': self.__get_pub_time(StringUtils.format_timestamp(result.get('createdDate'))),
+                    'date_elapsed': self.__get_pub_time(StringUtils.format_timestamp(result.get('createdDate'))),
                     'size': int(result.get('size') or '0'),
                     'seeders': int(result.get('status', {}).get("seeders") or '0'),
                     'peers': int(result.get('status', {}).get("leechers") or '0'),
@@ -168,6 +171,14 @@ class MTorrentSpider:
             log.warn(f"{self._name} 搜索失败，无法连接 {self._domain}")
             return True, []
         return False, torrents
+
+    @staticmethod
+    def __get_title(name: str) -> str:
+        if not name:
+            return name
+        if len(name) < 60:
+            return name
+        return name[:60] + "..."
 
     @staticmethod
     def __find_imdbid(imdb: str) -> str:
@@ -232,6 +243,21 @@ class MTorrentSpider:
         # base64编码
         base64_str = base64.b64encode(json.dumps(params).encode('utf-8')).decode('utf-8')
         return f"[{base64_str}]{url}"
+
+    def __get_pub_time(self, given_time_str: None):
+        if not given_time_str:
+            return ''
+        given_time = datetime.strptime(given_time_str, '%Y-%m-%d %H:%M:%S')
+        now = datetime.now()
+        time_difference = now - given_time
+        if time_difference.days > 0:
+            return f"{time_difference.days}天"
+        # 如果时间差不足一天，则计算小时数
+        elif (time_difference.seconds // 3600) > 0:
+            return f"{time_difference.seconds // 3600}小时"
+        else:
+            return f"{time_difference.seconds // 60}分钟"
+
 
     def __get_end_time(self, given_time_str: None):
         if not given_time_str:

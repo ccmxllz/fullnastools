@@ -120,6 +120,35 @@ class RequestUtils:
         except requests.exceptions.RequestException:
             return None
 
+    def post_res_v2(self, url, params=None, allow_redirects=True, files=None, json=None):
+        try:
+            if self._session:
+                return self._session.post(url,
+                                          params=params,
+                                          verify=False,
+                                          headers=self._headers,
+                                          proxies=self._proxies,
+                                          cookies=self._cookies,
+                                          timeout=self._timeout,
+                                          allow_redirects=allow_redirects,
+                                          files=files,
+                                          json=json)
+            else:
+                return requests.post(url,
+                                     params=params,
+                                     verify=False,
+                                     headers=self._headers,
+                                     proxies=self._proxies,
+                                     cookies=self._cookies,
+                                     timeout=self._timeout,
+                                     allow_redirects=allow_redirects,
+                                     files=files,
+                                     json=json)
+        except requests.exceptions.RequestException as e:
+            #  print(f"An error occurred: {e}")
+            #  print(traceback.format_exc())  # 导入traceback模块以打印堆栈跟踪
+            return None
+
     def post_res(self, url, params=None, allow_redirects=True, files=None, json=None):
         try:
             if self._session:
