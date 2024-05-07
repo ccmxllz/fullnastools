@@ -16,6 +16,9 @@
             {{ SVG.plus() }}
             新增下载
           </button>
+          <a href="javascript:clear_history()" id="clear_history_btn" class="btn btn-twitter d-none d-sm-inline-block">
+            清空历史
+          </a>
           <button data-bs-toggle="dropdown" type="button"
               class="btn btn-primary d-sm-none btn-icon">
             {{ SVG.plus() }}
@@ -116,6 +119,12 @@
   function stop_pt_download(id) {
     ajax_post("pt_stop", {"id": id}, function (ret) {
       get_torrent_info(ret.id)
+    });
+  }
+
+  function clear_history() {
+   ajax_post("clear_download_history", {}, function (ret) {
+       $("#clear_history_btn").text("success")
     });
   }
 

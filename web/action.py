@@ -206,7 +206,8 @@ class WebAction:
             "media_person": self.__media_person,
             "person_medias": self.__person_medias,
             "save_user_script": self.__save_user_script,
-            "run_directory_sync": self.__run_directory_sync
+            "run_directory_sync": self.__run_directory_sync,
+            "clear_download_history": self.__clear_download_history
         }
 
     def action(self, cmd, data=None):
@@ -4595,3 +4596,9 @@ class WebAction:
         """
         Sync().transfer_all_sync(sid=data.get("sid"))
         return {"code": 0, "msg": "执行成功"}
+
+    def __clear_download_history(self, data):
+        count = self.dbhelper.del_download_history()
+        return {"code": 0, "msg": "执行成功"}
+
+

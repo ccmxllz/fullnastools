@@ -1589,6 +1589,10 @@ class DbHelper:
             return self._db.query(DOWNLOADHISTORY).order_by(
                 DOWNLOADHISTORY.DATE.desc()).limit(num).offset(offset).all()
 
+    @DbPersist(_db)
+    def del_download_history(self):
+       return self._db.query(DOWNLOADHISTORY).delete()
+
     def is_media_downloaded(self, title, tmdbid):
         """
         根据标题和年份检查是否下载过
