@@ -60,39 +60,6 @@ class MTorrentSpider:
             self._apikey = indexer.apikey
             self._token = indexer.token
 
-    def __get_apikey(self) -> str:
-        """
-        获取ApiKey
-        """
-        domain_host = StringUtils.get_url_host(self._domain)
-        self._apikey = SystemConfigOper().get(f"site.{domain_host}.apikey")
-        if not self._apikey:
-            try:
-                res = RequestUtils(
-                    headers={
-                        "Content-Type": "application/json",
-                        "User-Agent": f"{self._ua}"
-                    },
-                    cookies=self._cookie,
-                    proxies=self._proxy,
-                    referer=f"{self._domain}usercp?tab=laboratory",
-                    timeout=15
-                ).post_res(url=f"{self._domain}api/apikey/getKeyList")
-                if res and res.status_code == 200:
-                    api_keys = res.json().get('data')
-                    if api_keys:
-                        log.info(f"{self._name} 获取ApiKey成功")
-                        # 按lastModifiedDate倒序排序
-                        api_keys.sort(key=lambda x: x.get('lastModifiedDate'), reverse=True)
-                        self._apikey = api_keys[0].get('apiKey')
-                        SystemConfigOper().set(f"site.{domain_host}.apikey", self._apikey)
-                    else:
-                        log.warn(f"{self._name} 获取ApiKey失败，请先在`控制台`->`实验室`建立存取令牌")
-                else:
-                    log.warn(f"{self._name} 获取ApiKey失败，请检查Cookie是否有效")
-            except Exception as e:
-                log.error(f"{self._name} 获取ApiKey出错：{e}")
-        return self._apikey
 
     def search(self, keyword: str, mtype: MediaType = None, mode: str = None, page: int = 0) -> Tuple[bool, List[dict]]:
         """
@@ -176,9 +143,9 @@ class MTorrentSpider:
     def __get_title(name: str) -> str:
         if not name:
             return name
-        if len(name) < 60:
+        if len(name) < 50:
             return name
-        return name[:60] + "..."
+        return name[:50] + "..."
 
     @staticmethod
     def __find_imdbid(imdb: str) -> str:

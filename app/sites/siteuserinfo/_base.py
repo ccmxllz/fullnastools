@@ -86,6 +86,10 @@ class _ISiteUserInfo(metaclass=ABCMeta):
         self._sys_mail_unread_page = "messages.php?action=viewmailbox&box=-2&unread=yes"
         self._torrent_seeding_params = None
         self._torrent_seeding_headers = None
+        self._mail_unread_params = None
+        self._mail_unread_headers = None
+        self._mail_content_params = None
+        self._mail_content_headers = None
         self._user_detail_params = None
         self._user_detail_headers = None
 
@@ -164,30 +168,47 @@ class _ISiteUserInfo(metaclass=ABCMeta):
 
     def _pase_unread_msgs(self):
         """
-        解析所有未读消息标题和内容
-        :return:
-        """
+         解析所有未读消息标题和内容
+         :return:
+         """
         unread_msg_links = []
         if self.message_unread > 0:
             links = {self._user_mail_unread_page, self._sys_mail_unread_page}
             for link in links:
                 if not link:
                     continue
-
                 msg_links = []
                 next_page = self._parse_message_unread_links(
-                    self._get_page_content(urljoin(self._base_url, link)), msg_links)
+                    self._get_page_content(
+                        url=urljoin(self._base_url, link),
+                        params=self._mail_unread_params,
+                        headers=self._mail_unread_headers
+                    ),
+                    msg_links)
                 while next_page:
                     next_page = self._parse_message_unread_links(
-                        self._get_page_content(urljoin(self._base_url, next_page)), msg_links)
-
+                        self._get_page_content(
+                            url=urljoin(self._base_url, next_page),
+                            params=self._mail_unread_params,
+                            headers=self._mail_unread_headers
+                        ),
+                        msg_links
+                    )
                 unread_msg_links.extend(msg_links)
-
+        # 重新更新未读消息数（99999表示有消息但数量未知）
+        if self.message_unread == 99999:
+            self.message_unread = len(unread_msg_links)
+        # 解析未读消息内容
         for msg_link in unread_msg_links:
-            print(msg_link)
-            log.debug(f"【Sites】{self.site_name} 信息链接 {msg_link}")
-            head, date, content = self._parse_message_content(self._get_page_content(urljoin(self._base_url, msg_link)))
-            log.debug(f"【Sites】{self.site_name} 标题 {head} 时间 {date} 内容 {content}")
+            log.debug(f"{self.site_name} 信息链接 {msg_link}")
+            head, date, content = self._parse_message_content(
+                self._get_page_content(
+                    urljoin(self._base_url, msg_link),
+                    params=self._mail_content_params,
+                    headers=self._mail_content_headers
+                )
+            )
+            log.debug(f"{self.site_name} 标题 {head} 时间 {date} 内容 {content}")
             self.message_unread_contents.append((head, date, content))
 
     def _parse_seeding_pages(self):
@@ -260,15 +281,10 @@ class _ISiteUserInfo(metaclass=ABCMeta):
             }
             if headers:
                 req_headers.update(headers)
-
-            if  isinstance(self._ua, str):
+            else:
                 req_headers.update({
                     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                    "User-Agent": f"{self._ua}"
                 })
-            else:
-                req_headers.update(self._ua)
-
             if self._addition_headers:
                 req_headers.update(self._addition_headers)
 
@@ -282,13 +298,18 @@ class _ISiteUserInfo(metaclass=ABCMeta):
             session = self._session
 
         if params:
-            res = RequestUtils(cookies=cookie, session=session, timeout=60,
-                               headers=req_headers).post_res(
-                url=url, params=params)
+            if req_headers.get("Content-Type") == "application/json":
+                res = RequestUtils(cookies=cookie,
+                                   session=session,
+                                   timeout=60,
+                                   headers=req_headers).post_res(url=url, json=params)
+            else:
+                req_headers["User-Agent"]=None
+                res = RequestUtils(cookies=cookie, session=session, timeout=60,
+                               headers=req_headers).post_res(url=url, params=params)
         else:
             res = RequestUtils(cookies=cookie, session=session, timeout=60,
-                               headers=req_headers).get_res(
-                url=url)
+                               headers=req_headers).get_res(url=url)
         if res is not None and res.status_code in (200, 500):
             if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
                 res.encoding = "UTF-8"
