@@ -304,7 +304,6 @@ class _ISiteUserInfo(metaclass=ABCMeta):
                                    timeout=60,
                                    headers=req_headers).post_res(url=url, json=params)
             else:
-                req_headers["User-Agent"]=None
                 res = RequestUtils(cookies=cookie, session=session, timeout=60,
                                headers=req_headers).post_res(url=url, params=params)
         else:
