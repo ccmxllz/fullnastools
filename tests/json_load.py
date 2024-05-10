@@ -1,8 +1,23 @@
 import json
 import pickle
 
+import os
+
+
+current_dir = os.getcwd()
+
+# Specify the filename to read
+filename = "sites.dat"
+parent_dir = os.path.dirname(current_dir)
+
+
+
+# Construct the full file path
+file_path = os.path.join(parent_dir + "\config", filename)
+print(file_path)
+
 # 加载数据
-with open(r'/Users/jiayun/soft/github-projects/fullnastools/config/sites.dat', 'rb') as f:
+with open(file_path, 'rb') as f:
     data = pickle.load(f)
 print(json.dumps(data, indent=4))
 # 对数据进行修改

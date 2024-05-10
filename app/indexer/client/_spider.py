@@ -515,6 +515,40 @@ class TorrentSpider(feapder.AirSpider):
             self.torrents_info['date_elapsed'] = self.__filter_text(self.torrents_info.get('date_elapsed'),
                                                                     selector.get('filters'))
 
+    def Get_free_deadline(self, torrent):
+        # torrent pubdate
+        if 'free_deadline' not in self.fields:
+            return
+        selector = self.fields.get('free_deadline', {})
+        free_deadline = torrent(selector.get('selector', ''))
+        if 'attribute' in selector:
+            items = [item.attr(selector.get('attribute')) for item in free_deadline.items() if item]
+        else:
+            items = [item.text() for item in free_deadline.items() if item]
+        item = items[0] if items else ''
+        self.torrents_info['free_deadline'] = item
+        if 'filters' in selector and item:
+            free_deadline_str = self.__filter_text(item, selector.get('filters'))
+            self.torrents_info['free_deadline'] = self.__get_free_deadline(free_deadline_str)
+
+    def __get_free_deadline(self, given_time_str: None):
+        if not given_time_str:
+            return ''
+        given_time = datetime.datetime.strptime(given_time_str, '%Y-%m-%d %H:%M:%S')
+        # 获取当前时间
+        now = datetime.datetime.now()
+        # 计算时间差
+        time_difference = given_time - now
+        # 如果时间差大于一天，则计算天数
+        if time_difference.days > 0:
+            return f"限时：{time_difference.days} 天 {time_difference.seconds // 3600} 小时内"
+        # 如果时间差不足一天，则计算小时数
+        elif (time_difference.seconds // 3600) > 0:
+            return f"限时：{time_difference.seconds // 3600} 小时内"
+        else:
+            return f"限时：{time_difference.seconds // 60} 分钟内"
+
+
     def Getdownloadvolumefactor(self, torrent):
         # downloadvolumefactor
         selector = self.fields.get('downloadvolumefactor', {})
@@ -579,6 +613,7 @@ class TorrentSpider(feapder.AirSpider):
             self.Getuploadvolumefactor(torrent)
             self.Getpubdate(torrent)
             self.Getelapsed_date(torrent)
+            self.Get_free_deadline(torrent)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             log.error("【Spider】%s 检索出现错误：%s" % (self.indexername, str(err)))
@@ -605,6 +640,7 @@ class TorrentSpider(feapder.AirSpider):
                     text = text.replace(r"%s" % args[0], r"%s" % args[-1])
                 elif method_name == "dateparse" and isinstance(args, str):
                     text = datetime.datetime.strptime(text, r"%s" % args)
+                    text = text.strftime(args)  # 格式化为字符串
                 elif method_name == "strip":
                     text = text.strip()
                 elif method_name == "appendleft":

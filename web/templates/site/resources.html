@@ -99,7 +99,7 @@
                         {% endif %}
                         {% if Result.downloadvolumefactor != 1.0 %}
                           {% if Result.downloadvolumefactor == 0.0 %}
-                            <span class="badge text-white bg-lime">FREE</span> {{Result.endtime  }}
+                            <span class="badge text-white bg-lime">FREE</span> {{Result.free_deadline  }}
                           {% else %}
                             <span class="badge text-white bg-blue">{{ (Result.downloadvolumefactor * 100) | int }}%DL</span>
                           {% endif %}

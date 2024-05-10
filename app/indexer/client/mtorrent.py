@@ -124,7 +124,7 @@ class MTorrentSpider:
                     'grabs': int(result.get('status', {}).get("timesCompleted") or '0'),
                     'downloadvolumefactor': self.__get_downloadvolumefactor(result.get('status', {}).get("discount")),
                     'uploadvolumefactor': self.__get_uploadvolumefactor(result.get('status', {}).get("discount")),
-                    'endtime': self.__get_end_time(result.get('status', {}).get("discountEndTime")),
+                    'free_deadline': self.__get_end_time(result.get('status', {}).get("discountEndTime")),
                     'page_url': self._pageurl % (self._domain, result.get('id')),
                     'imdbid': self.__find_imdbid(result.get('imdb')),
                     'labels': labels,
